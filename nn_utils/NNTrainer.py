@@ -3,8 +3,9 @@ from utils.utils import *
 from probes_lib.basic import *
 from utils.utils import AverageTracker
 from optimizers_lib.bgd_optimizer import BGD
-from optimizers_lib.bgd_optimizer_new_update import BGD_NEW_UPDATE
+from optimizers_lib.bgd_optimizer_new import BGD_NEW_UPDATE
 import torch
+import copy
 # import wandb
 
 
@@ -19,6 +20,7 @@ class NNTrainer:
         self.criterion = criterion       # type: torch.nn.modules.loss
         self.logger = logger             # type: Logger
         self.net = net                   # type: torch.nn.Module
+        self.global_net_copy = copy.deepcopy(net)
         self.device = torch.device('cpu')
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
@@ -273,6 +275,24 @@ class NNTrainer:
     def eval_mode(self):
         self.net.eval()
         self.probes_manager.eval()
+    
+    # Define a loss function with a regularizer
+    def loss_function_with_regularizer(self, loss, lambda_reg=0.01, reg_type='L2'):
+        # Cross-entropy loss
+        # ce_loss = nn.CrossEntropyLoss()(predictions, targets)
+        
+        # Regularization term
+        reg_loss = 0
+        if reg_type == 'L2':
+            # print("L2 regularization")
+            reg_loss  =  sum(param_l.sub(param_g).norm(2) ** 2 for (param_l,param_g) in zip(self.net.parameters(), self.global_net_copy.parameters()))
+            # reg_loss = sum(param.norm(2) ** 2 for param in self.net.parameters())
+        elif reg_type == 'L1':
+            reg_loss = sum(param.norm(1) for param in self.net.parameters())
+
+        # Total loss
+        total_loss = loss + lambda_reg * reg_loss
+        return total_loss
 
     def forward(self, data_loader=None, verbose_freq=2000, training=True, inference_method="test_mc",client_id = None,grad_clip = False, round_id = None):
         if training:
@@ -363,8 +383,12 @@ class NNTrainer:
                             labels[labels == lbl] = lbl_idx
                     # Calcualte loss only over the heads appear in the batch:
                     loss = self.criterion(outputs[:, unq_lbls], labels)
+                    # SKK
+                    loss = self.loss_function_with_regularizer(loss, lambda_reg=0.01, reg_type='L2')
                 else:
                     loss = self.criterion(outputs, labels)
+                    # SKK
+                    loss = self.loss_function_with_regularizer(loss, lambda_reg=0.01, reg_type='L2')
 
                 loss_avg.add(loss.item(), inputs.size(0))
                 if loss.item() != loss.item():
@@ -379,6 +403,7 @@ class NNTrainer:
 
                     ''' gradient clipping '''
                     if grad_clip:
+                        # continue
                         # print(f"{'*' * 100} \n max_grad_norm {self.max_grad_norm} \n{'*' * 100}")
                         if self.max_grad_norm is not None:
                             torch.nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm)
@@ -467,7 +492,8 @@ class NNTrainer:
             fwd_desc = fwd_name
             if not training:
                 fwd_desc += " [" + inference_method + "]"
-            self.logger.info("Stats for " + fwd_desc + " set of size " + str(set_size) + ", " +
+                # indent by SKK
+                self.logger.info("Stats for " + fwd_desc + " set of size " + str(set_size) + ", " +
                              "loss is " + str(round(loss_avg.avg,4)) + ", " +
                              "acc is " + str(round(acc_avg.avg,4)) + "%")
 

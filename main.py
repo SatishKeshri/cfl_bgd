@@ -170,13 +170,13 @@ def agg_client_models_avg(client_models,client_optimizers):
             if client_id == 0:
                 model_params[layer_id] = {}
                 model_params[layer_id]['mean_param'] = torch.div(layer['mean_param'],total_clients)
-                model_params[layer_id]['std_param'] = torch.div(layer['std_param'],total_clients)
+                model_params[layer_id]['std_param'] = torch.div(layer['std_param'],total_clients) # ISSUE: total_clients-1
             
             else:
                 model_params[layer_id]['mean_param'].add_(torch.div(layer['mean_param'],total_clients))
-                model_params[layer_id]['std_param'].add_(torch.div(layer['std_param'],total_clients))
+                model_params[layer_id]['std_param'].add_(torch.div(layer['std_param'],total_clients)) # ISSUE: total_clients-1
 
-    
+    # ISSUE: WRONG sigma and mean calculation  - take client wise deterministic ones
     for layer_id in model_params.keys():
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)
         model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
@@ -196,14 +196,14 @@ def agg_client_models_avg(client_models,client_optimizers):
     # print("Length of model state dict is ",len(client_models[0].state_dict()))
     # print(dir(client_models[0]))
 
-    layer_id = 0
-    for layer in agg_model.state_dict().keys():
+    # layer_id = 0
+    for layer_id, layer in enumerate(agg_model.state_dict().keys()):
         # print("Model stats")
         # print(type(client_models[0].state_dict()[layer]))
         # print(client_models[0].state_dict()[layer].shape) 
 
         agg_model_state_dict[layer] = model_params_lst[layer_id]
-        layer_id+=1
+        # layer_id+=1
 
         # print("Our lst stats")
         # print(type(model_params_lst[layer_id]))
@@ -276,7 +276,8 @@ def agg_client_models_new(client_models, client_optimizers):
 
     for layer_id in model_params.keys():
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)
-        model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
+        # model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
+        model_params[layer_id]['params'] = model_params[layer_id]['mean_param']#.add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
 
 
     model_params_lst = [layer_weights['params'] for layer_id,layer_weights in model_params.items()]
@@ -293,14 +294,14 @@ def agg_client_models_new(client_models, client_optimizers):
     # print("Length of model state dict is ",len(client_models[0].state_dict()))
     # print(dir(client_models[0]))
 
-    layer_id = 0
-    for layer in agg_model.state_dict().keys():
+    # layer_id = 0
+    for layed_id, layer in enumerate(agg_model.state_dict().keys()):
         # print("Model stats")
         # print(type(client_models[0].state_dict()[layer]))
         # print(client_models[0].state_dict()[layer].shape) 
 
         agg_model_state_dict[layer] = model_params_lst[layer_id]
-        layer_id+=1
+        # layer_id+=1
 
         # print("Our lst stats")
         # print(type(model_params_lst[layer_id]))
@@ -434,6 +435,9 @@ if args.federated_learning:
 
     if args.dataset == 'ds_cont_split_mnist':
         total_rounds = (len(classes_lst)) * (args.num_aggs_per_task)
+    
+    print(args.num_aggs_per_task)
+    # print(qhjqhjjhqejqk)
 
     
     
@@ -486,7 +490,7 @@ if args.federated_learning:
         server_model_params[layer_name] = {}
 
         server_model_params[layer_name]['g_mean_param'] = param
-        server_model_params[layer_name]['g_std_param'] = torch.full_like(param,args.std_init) 
+        server_model_params[layer_name]['g_std_param'] = torch.full_like(param,args.std_init)
 
     # optimizer model
     if args.optimizer == 'bgd_new_update':
@@ -526,7 +530,7 @@ if args.federated_learning:
                                     test_freq=args.test_freq,
                                     optimizer=copy.deepcopy(optimizer),
                                     max_grad_norm = args.max_grad_norm
-                                    ) 
+                                    )
 
                 current_client_trainer.net = copy.deepcopy(server_model)
 
@@ -537,7 +541,10 @@ if args.federated_learning:
 
                 else:
                     current_client_trainer.optimizer = optimizer_model(current_client_trainer.net, probes_manager=current_client_trainer.probes_manager, **optimizer_params)
-
+                
+                current_client_trainer.train_epochs(verbose_freq=500, max_epoch=client_max_epoch_counter[client_id],
+                                    permanent_prune_on_epoch=args.permanent_prune_on_epoch,
+                                    permanent_prune_on_epoch_percent=args.permanent_prune_on_epoch_percent,federated_learning=args.federated_learning,client_id = client_id,round = round_no,grad_clip = args.grad_clip)
             #Update the model in the trainer object
             else:
                 current_client_trainer = client_trainers[client_id]
@@ -551,7 +558,7 @@ if args.federated_learning:
                     current_client_trainer.optimizer = optimizer_model(current_client_trainer.net, probes_manager=current_client_trainer.probes_manager, **optimizer_params)
 
                 
-            """In federated setting the number of epochs is always 1,as we consider all iterations as 
+            """In federated setting the number of epoch(s) is always 1,as we consider all iterations as 
                 one big epoch(flattened all iterations over all epochs as a single epoch)"""
 
             if args.grad_clip:
@@ -628,7 +635,8 @@ if args.federated_learning:
         with torch.no_grad():
             for layer in server_model.parameters():
                 total+=torch.sum(layer)
-
+        
+        # temp_server_model  = 
         round_avg_acc, round_avg_loss, task_wise_test_acc, task_wise_test_loss = test_agg_model(server_model,test_loaders, round_no)
         avg_test_accuracies.append(round_avg_acc)
         avg_test_losses.append(round_avg_loss)
@@ -722,3 +730,4 @@ else:
 
 
     print("Done")
+    print(f"Trained with the following arguments {args}")

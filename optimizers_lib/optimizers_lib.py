@@ -1,6 +1,6 @@
 import torch.optim as optim
 from .bgd_optimizer import BGD
-from .bgd_optimizer_new_update import BGD_NEW_UPDATE
+from .bgd_optimizer_new import BGD_NEW_UPDATE
 
 
 def bgd(model, **kwargs):

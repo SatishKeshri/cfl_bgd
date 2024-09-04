@@ -1,9 +1,8 @@
 import torch
 from torch.optim.optimizer import Optimizer
 
-print("ITS HERE IN NORMAL BGD OPTIMIZER")
-
-class BGD(Optimizer):
+            
+class BGD_NEW_UPDATE(Optimizer):
     """Implements BGD.
     A simple usage of BGD would be:
     for samples, labels in batches:
@@ -13,10 +12,10 @@ class BGD(Optimizer):
             loss = cirterion(output, labels)
             optimizer.zero_grad()
             loss.backward()
-            optimizer.aggregate_grads()
+            optimizer.aggaregate_grads()
         optimizer.step()
     """
-    def __init__(self, params, std_init, mean_eta=1, mc_iters=10):
+    def __init__(self, params, server_model_params,  std_init, mean_eta=1, mc_iters=10,alpha_mg = 0.5):
         """
         Initialization of BGD optimizer
         group["mean_param"] is the learned mean.
@@ -27,14 +26,18 @@ class BGD(Optimizer):
         :param mc_iters: Number of Monte Carlo iteration. Used for correctness check.
                          Use None to disable the check.
         """
-        super(BGD, self).__init__(params, defaults={})
+        super(BGD_NEW_UPDATE, self).__init__(params, defaults={})
         assert mc_iters is None or (type(mc_iters) == int and mc_iters > 0), "mc_iters should be positive int or None."
         self.std_init = std_init
         self.mean_eta = mean_eta
         self.mc_iters = mc_iters
-        # Initialize mu (mean_param) and sigma (std_param)
+        self.alpha_mg = alpha_mg
+        self.server_model_params = {ind:value for ind, (layer_name, value) in enumerate(server_model_params.items())}
+        # Initialize mu (mean_param) and sigma (std_param) 
         # breakpoint()
-        for group in self.param_groups:
+        self.global_model_param_groups = []
+
+        for ind, group in enumerate(self.param_groups):
             assert len(group["params"]) == 1, "BGD optimizer does not support multiple params in a group"
             # group['params'][0] is the weights
             assert isinstance(group["params"][0], torch.Tensor), "BGD expect param to be a tensor"
@@ -42,10 +45,15 @@ class BGD(Optimizer):
             group["mean_param"] = group["params"][0].data.clone()
             #group["std_param"] = torch.zeros_like(group["params"][0].data).add_(self.std_init)
 
-            '''The above line has been replaced by the below line - Shiva Bhai Recommendation'''
             group["std_param"] = torch.full_like(group["params"][0].data,self.std_init)
 
-        self._init_accumulators()
+            self.global_model_param_groups.append({"g_mean_param":self.server_model_params[ind]['g_mean_param'].detach().clone(),
+                                                   "g_std_param":self.server_model_params[ind]['g_std_param'].detach().clone()})
+
+            # print("Breakpoint 1 Here")
+            # breakpoint()
+
+        self._init_accumulators()  
 
     def get_mc_iters(self):
         return self.mc_iters
@@ -64,8 +72,8 @@ class BGD(Optimizer):
         :return: None
         """
         for group in self.param_groups:
-            mean = group["mean_param"]
-            std = group["std_param"]
+            mean = group["mean_param"] # theta recieved from the server
+            std = group["std_param"] # initialized   
             if force_std >= 0:
                 std = std.mul(0).add(force_std)
             group["eps"] = torch.normal(torch.zeros_like(mean), 1)
@@ -107,16 +115,59 @@ class BGD(Optimizer):
                                                                               + str(self.mc_iters) \
                                                                               + ", but took " + \
                                                                               str(self.mc_iters_taken) + " MC iters"
+        # need global mu, sigma
+        for ind,group in enumerate(self.param_groups):
+            mean = group["mean_param"] # mu k n-1
+            std = group["std_param"] # sigma k n-1 
 
-        for group in self.param_groups:
-            mean = group["mean_param"]
-            std = group["std_param"]
+            g_mean = self.global_model_param_groups[ind]["g_mean_param"]
+            g_std = self.global_model_param_groups[ind]["g_std_param"]
+
+            var = std.pow(2)
+            g_var = g_std.pow(2) 
+
+        
             # Divide gradients by MC iters to get expectation
             e_grad = group["grad_sum"].div(self.mc_iters_taken)
             e_grad_eps = group["grad_mul_eps_sum"].div(self.mc_iters_taken)
+
             # Update mean and STD params
-            mean.add_(-std.pow(2).mul(e_grad).mul(self.mean_eta))
-            sqrt_term = torch.sqrt(e_grad_eps.mul(std).div(2).pow(2).add(1)).mul(std)
-            std.copy_(sqrt_term.add(-e_grad_eps.mul(std.pow(2)).div(2)))
+
+            # print("Local mean", mean)
+            # print("Global mean", g_mean)
+
+            # print("Local std", std)
+            # print("Global std", g_std)
+            
+            denominator = var.mul(self.alpha_mg).add(g_var.mul(1-self.alpha_mg))
+
+            # print("denominator",denominator)
+
+            mean_term1 = var.mul(g_mean).mul(self.alpha_mg).div(denominator)
+
+            # print("mean_term1",mean_term1)
+
+            mean_term2 = g_var.mul(mean).mul(1-self.alpha_mg).div(denominator)
+
+            # print("mean_term2",mean_term2)
+
+            # print("E_grad", e_grad)
+
+            mean_term3 = -(var.mul(g_var).div(denominator)).mul(e_grad).mul(self.mean_eta)
+
+            # print("mean_term3",mean_term3)
+
+            mean.copy_(mean_term1.add(mean_term2).add(mean_term3))
+
+            # print("Final mean", mean)
+
+            sqrt_term = torch.sqrt(e_grad_eps.mul(g_std).mul(std).div(2).pow(2).add(denominator)).mul(g_std.mul(std)).div(denominator)
+
+            # print("sqrt_term", sqrt_term)
+
+            std.copy_(sqrt_term.add(-e_grad_eps.mul(g_std.mul(std).pow(2)).div(denominator.mul(2))))
+
+            # print("Final std", std)
+
         self.randomize_weights(force_std=0)
         self._init_accumulators()
