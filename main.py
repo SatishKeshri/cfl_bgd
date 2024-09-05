@@ -377,6 +377,9 @@ def test_agg_model(server_model,test_loaders, round_no):
 # Dataset
 
 if args.federated_learning:
+    with open(f'all_experiments_results/{args.results_dir}.txt', 'a') as f:
+        f.write(f"Arguments are {args}")
+        f.write("#"*15)
     client_train_loaders, test_loaders = utils.datasets.__dict__[args.dataset](batch_size=args.batch_size,
                                                                         num_workers=args.num_workers,
                                                                         permutations=all_permutation,
@@ -412,10 +415,7 @@ if args.federated_learning:
         total_rounds = (len(classes_lst)) * (args.num_aggs_per_task)
     
     print(args.num_aggs_per_task)
-    # print(qhjqhjjhqejqk)
-
-    
-    
+      
 
     optimizer_model = optimizers_lib.__dict__[args.optimizer]
 
@@ -563,8 +563,10 @@ if args.federated_learning:
             for layer in server_model.parameters():
                 total+=torch.sum(layer)
         # Client-wise accuracies - SKK
+        client_wise_report = {}
         for cl_id in range(args.n_clients):
             cl_round_avg_acc, cl_round_avg_loss, cl_task_wise_test_acc, cl_task_wise_test_loss = test_agg_model(client_models[cl_id],test_loaders, round_no)
+            client_wise_report[str(cl_id)] = [cl_task_wise_test_loss, cl_task_wise_test_acc]
             logger.info(f"Client {cl_id} task-wise loss and accuracies are - {cl_task_wise_test_loss, cl_task_wise_test_acc}")
         ##
         round_avg_acc, round_avg_loss, task_wise_test_acc, task_wise_test_loss = test_agg_model(server_model,test_loaders, round_no)
@@ -577,6 +579,12 @@ if args.federated_learning:
         logger.info(f"Aggregated model avg acc and avg loss - {round_avg_acc, round_avg_loss}")
         
         logger.info(f"Round - {round_no+1} complete")
+
+        with open(f'all_experiments_results/{args.results_dir}.txt', 'a') as f:
+            f.write(f"Round {round_no+1} complete\n")
+            f.write(f"####### Round No. - {round_no+1}, Task No. - {(round_no) // (args.num_aggs_per_task)} #########")
+            f.write(f"Client-wise [loss, accuracy] accuracies {args.optimizer}_optim after all rouds are {client_wise_report}\n")
+            f.write("#############################")
 
     with open(f'all_experiments_results/{args.results_dir}.txt', 'a') as f:
         f.write(f"Task-wise accuracies {args.optimizer}_optim after all rounds are {task_wise_accuracies_every_round}\n")
