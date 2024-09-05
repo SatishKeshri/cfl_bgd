@@ -146,6 +146,8 @@ lastlogs_logger = None
 
 print("Dataset is ",args.dataset)
 
+logger.info(f"Arguments are {args}")
+# print(f"Trained with the following arguments {args}")
 
 ''' prev aggregation '''
 
@@ -170,11 +172,11 @@ def agg_client_models_avg(client_models,client_optimizers):
             if client_id == 0:
                 model_params[layer_id] = {}
                 model_params[layer_id]['mean_param'] = torch.div(layer['mean_param'],total_clients)
-                model_params[layer_id]['std_param'] = torch.div(layer['std_param'],total_clients) # ISSUE: total_clients-1
+                model_params[layer_id]['std_param'] = torch.div(layer['std_param'],total_clients-1) # ISSUE: total_clients-1
             
             else:
                 model_params[layer_id]['mean_param'].add_(torch.div(layer['mean_param'],total_clients))
-                model_params[layer_id]['std_param'].add_(torch.div(layer['std_param'],total_clients)) # ISSUE: total_clients-1
+                model_params[layer_id]['std_param'].add_(torch.div(layer['std_param'],total_clients-1)) # ISSUE: total_clients-1
 
     # ISSUE: WRONG sigma and mean calculation  - take client wise deterministic ones
     for layer_id in model_params.keys():
@@ -277,6 +279,7 @@ def agg_client_models_new(client_models, client_optimizers):
     for layer_id in model_params.keys():
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)
         # model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
+        # By SKK  - Taking only mean for theta  = mu + epsilon*sigma (eps = 0)
         model_params[layer_id]['params'] = model_params[layer_id]['mean_param']#.add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
 
 
@@ -295,7 +298,7 @@ def agg_client_models_new(client_models, client_optimizers):
     # print(dir(client_models[0]))
 
     # layer_id = 0
-    for layed_id, layer in enumerate(agg_model.state_dict().keys()):
+    for layer_id, layer in enumerate(agg_model.state_dict().keys()):
         # print("Model stats")
         # print(type(client_models[0].state_dict()[layer]))
         # print(client_models[0].state_dict()[layer].shape) 
@@ -513,7 +516,9 @@ if args.federated_learning:
     #     "max_grad_norm" : args.max_grad_norm
     # }) 
 
-    for round_no in range(total_rounds): 
+    for round_no in range(total_rounds):
+        print(round_no)
+        # continue
         avg_acc, avg_loss = 0, 0
         for client_id in range(args.n_clients):
             # Model
@@ -614,8 +619,8 @@ if args.federated_learning:
 
         if args.optimizer == 'bgd_new_update' or args.optimizer == 'bgd':
             # new aggregation
-            server_model, server_model_params = agg_client_models_avg(client_models, client_optimizers)
-            #server_model, server_model_params = agg_client_models_new(client_models, client_optimizers)
+            # server_model, server_model_params = agg_client_models_avg(client_models, client_optimizers)
+            server_model, server_model_params = agg_client_models_new(client_models, client_optimizers)
 
             # # avg aggregation
             # server_model = agg_client_models_avg(client_models, client_optimizers)

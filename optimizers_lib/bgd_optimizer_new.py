@@ -205,14 +205,14 @@ class BGD_NEW_UPDATE(Optimizer):
                                                                               + str(self.mc_iters) \
                                                                               + ", but took " + \
                                                                               str(self.mc_iters_taken) + " MC iters"
-        self.randomize_weights_GMM(force_std=0)
-        # First set the weights to the GMM weights
-        for (group_l, group_g) in zip(self.param_groups, self.global_model_param_groups):
-            mean_l, mean_g = group_l["mean_param"], group_g["g_mean_param"]
-            std_l, std_g = group_l["std_param"], group_g["g_std_param"]
-            mean_l.copy_(mean_g.mul(self.alpha_mg).add(mean_l.mul(1-self.alpha_mg)))
-            std_l.copy_(torch.sqrt(std_l.pow(2).mul(self.alpha_mg).add(std_g.pow(2).mul(1-self.alpha_mg)).add(self.alpha_mg*(1-self.alpha_mg)*(mean_l-mean_g).pow(2))))
-        print(f"Weights are set to GMM weights: last ones are: {mean_l, std_l}")
+        # self.randomize_weights_GMM(force_std=0)
+        # # First set the weights to the GMM weights
+        # for (group_l, group_g) in zip(self.param_groups, self.global_model_param_groups):
+        #     mean_l, mean_g = group_l["mean_param"], group_g["g_mean_param"]
+        #     std_l, std_g = group_l["std_param"], group_g["g_std_param"]
+        #     mean_l.copy_(mean_g.mul(self.alpha_mg).add(mean_l.mul(1-self.alpha_mg)))
+        #     std_l.copy_(torch.sqrt(std_l.pow(2).mul(self.alpha_mg).add(std_g.pow(2).mul(1-self.alpha_mg)).add(self.alpha_mg*(1-self.alpha_mg)*(mean_l-mean_g).pow(2))))
+        # print(f"Weights are set to GMM weights: last ones are: {mean_l, std_l}")
         for group in self.param_groups:
             mean = group["mean_param"]
             std = group["std_param"]

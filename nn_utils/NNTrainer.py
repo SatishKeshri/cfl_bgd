@@ -384,11 +384,11 @@ class NNTrainer:
                     # Calcualte loss only over the heads appear in the batch:
                     loss = self.criterion(outputs[:, unq_lbls], labels)
                     # SKK
-                    loss = self.loss_function_with_regularizer(loss, lambda_reg=0.01, reg_type='L2')
+                    # loss = self.loss_function_with_regularizer(loss, lambda_reg=0.01, reg_type='L2')
                 else:
                     loss = self.criterion(outputs, labels)
                     # SKK
-                    loss = self.loss_function_with_regularizer(loss, lambda_reg=0.01, reg_type='L2')
+                    # loss = self.loss_function_with_regularizer(loss, lambda_reg=0.01, reg_type='L2')
 
                 loss_avg.add(loss.item(), inputs.size(0))
                 if loss.item() != loss.item():
