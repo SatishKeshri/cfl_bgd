@@ -280,40 +280,15 @@ def agg_client_models_new(client_models, client_optimizers):
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)
         # model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
         # By SKK  - Taking only mean for theta  = mu + epsilon*sigma (eps = 0)
-        model_params[layer_id]['params'] = model_params[layer_id]['mean_param']#.add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
-
+        model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(args.std_init))# (model_params[layer_id]['std_param']))
 
     model_params_lst = [layer_weights['params'] for layer_id,layer_weights in model_params.items()]
-
-    #print(model_params_lst,len(model_params_lst))
-
-
     agg_model = copy.deepcopy(client_models[0])
-
     agg_model_state_dict = {}
 
-
-    # print(client_models[0].state_dict())
-    # print("Length of model state dict is ",len(client_models[0].state_dict()))
-    # print(dir(client_models[0]))
-
-    # layer_id = 0
     for layer_id, layer in enumerate(agg_model.state_dict().keys()):
-        # print("Model stats")
-        # print(type(client_models[0].state_dict()[layer]))
-        # print(client_models[0].state_dict()[layer].shape) 
-
         agg_model_state_dict[layer] = model_params_lst[layer_id]
-        # layer_id+=1
-
-        # print("Our lst stats")
-        # print(type(model_params_lst[layer_id]))
-        # print(model_params_lst[layer_id].shape)
-        # layer_id+=1
-    
-    # print(agg_model_state_dict)
-
-    # print(agg_model)
+        
     agg_model.load_state_dict(agg_model_state_dict)
 
     new_model_params = {}
@@ -353,11 +328,8 @@ def agg_client_models_sgd(client_models, client_optimizers):
 def test_agg_model(server_model,test_loaders, round_no):
  
     criterion = nn.CrossEntropyLoss()
-
-
     test_accuracies = []
     test_losses = []
-
     task_no = (round_no) // (args.num_aggs_per_task) # always be from 0 - 9 || 0-4 rounds (task_no 0) || 5-9 rounds (task_no 1)
 
     with torch.no_grad():
@@ -547,10 +519,6 @@ if args.federated_learning:
                 else:
                     current_client_trainer.optimizer = optimizer_model(current_client_trainer.net, probes_manager=current_client_trainer.probes_manager, **optimizer_params)
                 
-                current_client_trainer.train_epochs(verbose_freq=500, max_epoch=client_max_epoch_counter[client_id],
-                                    permanent_prune_on_epoch=args.permanent_prune_on_epoch,
-                                    permanent_prune_on_epoch_percent=args.permanent_prune_on_epoch_percent,federated_learning=args.federated_learning,client_id = client_id,round = round_no,grad_clip = args.grad_clip)
-            #Update the model in the trainer object
             else:
                 current_client_trainer = client_trainers[client_id]
                 current_client_trainer.net = copy.deepcopy(server_model)
@@ -562,58 +530,26 @@ if args.federated_learning:
                 else:
                     current_client_trainer.optimizer = optimizer_model(current_client_trainer.net, probes_manager=current_client_trainer.probes_manager, **optimizer_params)
 
-                
             """In federated setting the number of epoch(s) is always 1,as we consider all iterations as 
                 one big epoch(flattened all iterations over all epochs as a single epoch)"""
 
             if args.grad_clip:
                 logger.info("Gradient clipping with max_norm being done")
             
-            # if round_no > 0:
             current_client_trainer.train_epochs(verbose_freq=500, max_epoch=client_max_epoch_counter[client_id],
                                     permanent_prune_on_epoch=args.permanent_prune_on_epoch,
                                     permanent_prune_on_epoch_percent=args.permanent_prune_on_epoch_percent,federated_learning=args.federated_learning,client_id = client_id,round = round_no,grad_clip = args.grad_clip)
-                
-            # print(dir(trainer))
-            # print(dir(trainer.train_loader[0]))
-            # print(trainer.train_loader[0].sampler)
-            # print(dir(trainer.train_loader[0].sampler))
-            # print(trainer.train_loader[0].sampler.current_iteration)
-            # exit()
-
-            # Log gradients and weights to wandb
-            # for name, param in current_client_trainer.net.named_parameters():
-            #     if param.grad is not None:
-            #         wandb.log({
-            #             "round": round_no + 1,
-            #             "client": client_id + 1,
-            #             f"client_{client_id}/gradients/{name}": wandb.Histogram(param.grad.cpu().numpy()),
-            #             f"client_{client_id}/weights/{name}": wandb.Histogram(param.data.cpu().numpy())
-            #         })
-
-            # wandb.watch(current_client_trainer.net, log = 'all')
-            #  Watch the model 
-            # wandb.watch(current_client_trainer.net, log='all', log_freq = 1)
 
             client_trainers[client_id] = current_client_trainer
             client_models[client_id] = current_client_trainer.net
             client_optimizers[client_id] = current_client_trainer.optimizer
 
-
             client_max_epoch_counter[client_id]+=1
-
             print(f"Round - {round_no+1},Client - {client_id+1}")
-
-            
-
             print(f"{current_client_trainer.train_loader[0].sampler.current_iteration},",
                   f"{current_client_trainer.train_loader[0].sampler.current_round_start_iter},",
                   f"{current_client_trainer.train_loader[0].sampler.current_round_end_iter}")
-         
-         
-            
-
-
+        
         if args.optimizer == 'sgd':
             server_model = agg_client_models_sgd(client_models, client_optimizers)
 
@@ -622,36 +558,20 @@ if args.federated_learning:
             # server_model, server_model_params = agg_client_models_avg(client_models, client_optimizers)
             server_model, server_model_params = agg_client_models_new(client_models, client_optimizers)
 
-            # # avg aggregation
-            # server_model = agg_client_models_avg(client_models, client_optimizers)
-
-        
-
-
-        # # Save the aggregated model
-            
-        # agg_model_dir = os.path.join(save_path, 'agg_models')
-        # if not os.path.exists(agg_model_dir):
-        #     os.makedirs(agg_model_dir)
-        # model_save_path = os.path.join(agg_model_dir, f'aggregated_model_round_{round_no+1}.pth')
-        # torch.save(server_model.state_dict(), model_save_path)
-
         total = 0
         with torch.no_grad():
             for layer in server_model.parameters():
                 total+=torch.sum(layer)
-        
-        # temp_server_model  = 
+        # Client-wise accuracies - SKK
+        for cl_id in range(args.n_clients):
+            cl_round_avg_acc, cl_round_avg_loss, cl_task_wise_test_acc, cl_task_wise_test_loss = test_agg_model(client_models[cl_id],test_loaders, round_no)
+            logger.info(f"Client {cl_id} task-wise loss and accuracies are - {cl_task_wise_test_loss, cl_task_wise_test_acc}")
+        ##
         round_avg_acc, round_avg_loss, task_wise_test_acc, task_wise_test_loss = test_agg_model(server_model,test_loaders, round_no)
         avg_test_accuracies.append(round_avg_acc)
         avg_test_losses.append(round_avg_loss)
         task_wise_accuracies_every_round.append(task_wise_test_acc)
         task_wise_losses_every_round.append(task_wise_test_loss)
-
-        # wandb.log({
-        #     "round_avg_acc": round_avg_acc,
-        #     "round_avg_loss": round_avg_loss
-        # })
 
         logger.info(f"Value of server model at round {round_no+1} is {total.item()}")
         logger.info(f"Aggregated model avg acc and avg loss - {round_avg_acc, round_avg_loss}")

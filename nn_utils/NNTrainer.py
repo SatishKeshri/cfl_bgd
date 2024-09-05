@@ -115,22 +115,6 @@ class NNTrainer:
             self.logger.info("Running training from epoch " + str(self.epochs_trained + 1) + " to epoch " + str(max_epoch))
 
         print("Model id is ",id(self.net))
-
-        #Verify current model and current optimizer
-
-        # current_model_params = {id(param) for param in self.net.parameters()}
-        # current_optimizer_params = {id(param) for group in self.optimizer.param_groups for param in group['params']}
-
-        # if current_model_params == current_optimizer_params:
-        #     print("Model and Optimizer are in sync perfectly")
-        
-        # else:
-        #     print("Check the difference")
-        #     print(current_model_params)
-        #     print(current_optimizer_params)
-
-        #After running the above commented code we came to a conclusion that both model and optimizer are in perfect sync
-
         
         if kwargs.get("federated_learning",False):
             total = 0
@@ -143,9 +127,6 @@ class NNTrainer:
         for epoch_number in range(self.epochs_trained, max_epoch):
             # Time recorders
             epoch_time = TimeRecorder()
-            #####
-            # Train
-            #####
             if self.save_stats_on_epoch(epoch_number, max_epoch):
                 self.probes_manager.epoch_prologue()
 
@@ -168,10 +149,7 @@ class NNTrainer:
                               "weights": self.weights_lst(),
                               "epochs_trained": self.epochs_trained}
                 self.probes_manager.add_data(probe_loc="post_train_forward", **probe_data)
-
-            #####
-            # Test
-            #####
+            ####### Test #######
             # Run test set for every inference method
             if self.save_stats_on_epoch(epoch_number, max_epoch):
                 for inference_method in self.inference_methods:
@@ -362,9 +340,6 @@ class NNTrainer:
                 # Forward:
                 outputs = self.net(inputs)
 
-                # Save running mean and var for BatchNorm layers. We don't want each minibatch to go through the
-                #      running statistics train_mc_iters times, thus we save the running stats after the first
-                #      MonteCarlo iteration and restore it after the last iteration.
                 if k == 0 and self.save_bn_runnings and training:
                     runnings = save_bn_running(self.net)
 
@@ -372,11 +347,6 @@ class NNTrainer:
                 if self.labels_trick and training:
                     # Use labels trick
                     if k == 0:
-                        # We do so only when k==0 (first MC iteration) because we don't want to check the unique labels
-                        #   twice (we assign the labels inplace)
-                        # Thus, this check for k==0 is only for algorithms with MonteCarlo iterations, other algorithms
-                        #   should just apply the labels trick every iteration.
-                        # Get current batch labels (and sort them for reassignment)
                         unq_lbls = labels.unique().sort()[0]
                         # Assign new labels (0,1 ...)
                         for lbl_idx, lbl in enumerate(unq_lbls):
