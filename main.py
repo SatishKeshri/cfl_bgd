@@ -103,16 +103,16 @@ if args.optimizer == 'bgd_new_update'or args.optimizer == 'bgd':
 
 
 
-save_path = os.path.join("./logs", str(args.results_dir) + "/")
+save_path = os.path.join("./icassp_logs", str(args.results_dir) + "/")
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 
 
-if not os.path.exists('all_experiments_results'):
-    os.makedirs('all_experiments_results')
+if not os.path.exists('icassp_all_experiments_results'):
+    os.makedirs('icassp_all_experiments_results')
 
 # Write the initial message to the file before entering the loop
-with open(f'all_experiments_results/{args.results_dir}.txt', 'w') as f:
+with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'w') as f:
     f.write(f"{'*'*100}\n")
     f.write(f"Writing results to {args.results_dir}\n")
 
@@ -154,12 +154,6 @@ logger.info(f"Arguments are {args}")
 
 def agg_client_models_avg(client_models,client_optimizers):
 
-    #server_model = client_models[0].named_parameters()
-
-    # print(dir(client_models[0]))
-    # print(dir(client_optimizers[0]))
-
-    #print("-------OPTIMIZER FROM HERE-----")
 
     model_params = {}
 
@@ -186,38 +180,12 @@ def agg_client_models_avg(client_models,client_optimizers):
 
     model_params_lst = [layer_weights['params'] for layer_id,layer_weights in model_params.items()]
 
-    #print(model_params_lst,len(model_params_lst))
-
-
     agg_model = copy.deepcopy(client_models[0])
-
     agg_model_state_dict = {}
 
-
-    # print(client_models[0].state_dict())
-    # print("Length of model state dict is ",len(client_models[0].state_dict()))
-    # print(dir(client_models[0]))
-
-    # layer_id = 0
     for layer_id, layer in enumerate(agg_model.state_dict().keys()):
-        # print("Model stats")
-        # print(type(client_models[0].state_dict()[layer]))
-        # print(client_models[0].state_dict()[layer].shape) 
-
         agg_model_state_dict[layer] = model_params_lst[layer_id]
-        # layer_id+=1
-
-        # print("Our lst stats")
-        # print(type(model_params_lst[layer_id]))
-        # print(model_params_lst[layer_id].shape)
-        # layer_id+=1
-    
-    # print(agg_model_state_dict)
-
-    # Rename keys to g_mean_param and g_std_param
-    
-
-    # print(agg_model)
+        
     agg_model.load_state_dict(agg_model_state_dict)
 
     new_model_params = {}
@@ -231,22 +199,11 @@ def agg_client_models_avg(client_models,client_optimizers):
 
 
 def agg_client_models_new(client_models, client_optimizers):
-
-    # server_model = client_models[0].named_parameters()
-
-    # print(dir(client_models[0]))
-    # print(dir(client_optimizers[0]))
-
-    #print("-------OPTIMIZER FROM HERE-----")
-
     model_params = {}
-
     total_clients = len(client_optimizers.keys())
 
     for client_id in client_optimizers.keys():
-    
         for layer_id,layer in enumerate(client_optimizers[client_id].param_groups):
-
             if client_id == 0:
                 model_params[layer_id] = {}
                 model_params[layer_id]['mean_param'] = torch.div(layer['mean_param'], total_clients)
@@ -255,7 +212,6 @@ def agg_client_models_new(client_models, client_optimizers):
                 model_params[layer_id]['mean_param'].add_(torch.div(layer['mean_param'], total_clients))
        
     for client_id in client_optimizers.keys():
-
         for layer_id,layer in enumerate(client_optimizers[client_id].param_groups):
 
             current_client_variance = torch.square(layer['std_param'])
@@ -268,13 +224,8 @@ def agg_client_models_new(client_models, client_optimizers):
             else :
                 model_params[layer_id]['variance_param'].add_(torch.div(torch.sub(torch.add(current_client_variance, current_client_mean_square), server_mean_param_square ), total_clients))
 
-    
-
     for layer_id,layer in enumerate(client_optimizers[client_id].param_groups):
-
-        model_params[layer_id]['std_param'] = torch.sqrt(model_params[layer_id]['variance_param'])
-
-       
+        model_params[layer_id]['std_param'] = torch.sqrt(model_params[layer_id]['variance_param']) 
 
     for layer_id in model_params.keys():
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)
@@ -290,7 +241,6 @@ def agg_client_models_new(client_models, client_optimizers):
         agg_model_state_dict[layer] = model_params_lst[layer_id]
         
     agg_model.load_state_dict(agg_model_state_dict)
-
     new_model_params = {}
     for layer_id, layer_weights in model_params.items():
         new_model_params[layer_id] = {
@@ -307,7 +257,6 @@ def agg_client_models_sgd(client_models, client_optimizers):
     agg_model_params = {} # layer_ids, layer_weights
 
     for client_id in client_optimizers.keys():
-
         for layer_id, layer in enumerate(client_optimizers[client_id].param_groups):
 
             if client_id == 0:
@@ -316,17 +265,12 @@ def agg_client_models_sgd(client_models, client_optimizers):
             else:
                 agg_model_params[layer['name']].add_(torch.div(layer['params'][0], total_clients))
 
-    #print(model_params_lst,len(model_params_lst))
-    # breakpoint()
-
     agg_model = copy.deepcopy(client_models[0])
-    # print("Length of model state dict is ",len(client_models[0].state_dict()))
     agg_model.load_state_dict(agg_model_params)
 
     return agg_model 
 
 def test_agg_model(server_model,test_loaders, round_no):
- 
     criterion = nn.CrossEntropyLoss()
     test_accuracies = []
     test_losses = []
@@ -362,13 +306,9 @@ def test_agg_model(server_model,test_loaders, round_no):
 
     avg_acc = sum(test_accuracies)/len(test_accuracies)
     avg_loss = sum(test_losses)/len(test_losses)
-  
-    
-     # and task_wise_accuracies_lst {test_accuracies}")
     
     rounded_test_accuracies = [round(num, 3) for num in test_accuracies]
     rounded_test_losses = [round(num, 3) for num in test_losses]
-
     logger.info(f"Task wise accuracies after round {round_no+1} are {rounded_test_accuracies}")
     
     return round(avg_acc,3), round(avg_loss,3), rounded_test_accuracies, rounded_test_losses 
@@ -377,9 +317,9 @@ def test_agg_model(server_model,test_loaders, round_no):
 # Dataset
 
 if args.federated_learning:
-    with open(f'all_experiments_results/{args.results_dir}.txt', 'a') as f:
-        f.write(f"Arguments are {args}")
-        f.write("#"*15)
+    with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'a') as f:
+        f.write(f"Arguments are {args}\n")
+        f.write(f"########################## \n")
     client_train_loaders, test_loaders = utils.datasets.__dict__[args.dataset](batch_size=args.batch_size,
                                                                         num_workers=args.num_workers,
                                                                         permutations=all_permutation,
@@ -393,11 +333,6 @@ if args.federated_learning:
                                                                         num_aggs_per_task = args.num_aggs_per_task, 
                                                                         classes_lst = classes_lst,
                                                                         alpha = args.alpha)
-
-
-    #Modify below code as per Federated requirements
-
-    #Probes manager
 
     server_model = None
     client_models = {client_id:None for client_id in range(args.n_clients)}
@@ -413,9 +348,7 @@ if args.federated_learning:
 
     if args.dataset == 'ds_cont_split_mnist':
         total_rounds = (len(classes_lst)) * (args.num_aggs_per_task)
-    
-    print(args.num_aggs_per_task)
-      
+    print(args.num_aggs_per_task)      
 
     optimizer_model = optimizers_lib.__dict__[args.optimizer]
 
@@ -437,7 +370,6 @@ if args.federated_learning:
                                         "std_init": args.std_init,
                                         "mc_iters": args.train_mc_iters,"alpha_mg":args.alpha_mg}, **literal_eval(" ".join(args.optimizer_params)))
     
-
     probes_manager = ProbesManager()
     server_model = models.__dict__[args.nn_arch](probes_manager=probes_manager)
 
@@ -580,15 +512,15 @@ if args.federated_learning:
         
         logger.info(f"Round - {round_no+1} complete")
 
-        with open(f'all_experiments_results/{args.results_dir}.txt', 'a') as f:
-            f.write(f"Round {round_no+1} complete\n")
-            f.write(f"####### Round No. - {round_no+1}, Task No. - {(round_no) // (args.num_aggs_per_task)} #########")
-            f.write(f"Client-wise [loss, accuracy] accuracies {args.optimizer}_optim after all rouds are {client_wise_report}\n")
-            f.write("#############################")
+        with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'a') as f:
+            f.write(f"######### Round {round_no+1} complete ######### \n")
+            f.write(f"####### Round No. - {round_no+1}, Task No. - {(round_no) // (args.num_aggs_per_task)} #########\n")
+            f.write(f"Client-wise [loss, accuracy] accuracies {args.optimizer}_optim after all rounds are {client_wise_report}\n")
+            f.write(f"############################# \n")
 
-    with open(f'all_experiments_results/{args.results_dir}.txt', 'a') as f:
+    with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'a') as f:
         f.write(f"Task-wise accuracies {args.optimizer}_optim after all rounds are {task_wise_accuracies_every_round}\n")
-        f.write(f"Task-wise losses {args.optimizer}_optim after all rouds are {task_wise_losses_every_round}\n")
+        f.write(f"Task-wise losses {args.optimizer}_optim after all rounds are {task_wise_losses_every_round}\n")
         f.write(f"Average accuracies {args.optimizer}_optim after all rouds are {avg_test_accuracies}\n")
         f.write(f"Average losses {args.optimizer}_optim after all rouds are {avg_test_losses}\n")
 
@@ -658,9 +590,6 @@ else:
     trainer.train_epochs(verbose_freq=100, max_epoch=args.num_epochs,
                         permanent_prune_on_epoch=args.permanent_prune_on_epoch,
                         permanent_prune_on_epoch_percent=args.permanent_prune_on_epoch_percent)
-
-    # print(trainer.optimizer.param_groups)
-
 
     print("Done")
     print(f"Trained with the following arguments {args}")

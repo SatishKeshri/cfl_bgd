@@ -2,6 +2,6 @@ __pycache__/
 .github/
 data/
 
-logs/
-all_experiments_results/
+# logs/
+# all_experiments_results/
 wandb/

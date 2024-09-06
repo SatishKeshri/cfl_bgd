@@ -1,7 +1,7 @@
 import torch
 from torch.optim.optimizer import Optimizer
 
-            
+
 class BGD_NEW_UPDATE(Optimizer):
     """Implements BGD.
     A simple usage of BGD would be:
@@ -26,6 +26,7 @@ class BGD_NEW_UPDATE(Optimizer):
         :param mc_iters: Number of Monte Carlo iteration. Used for correctness check.
                          Use None to disable the check.
         """
+        print("It's here in new bgd optimizer")
         super(BGD_NEW_UPDATE, self).__init__(params, defaults={})
         assert mc_iters is None or (type(mc_iters) == int and mc_iters > 0), "mc_iters should be positive int or None."
         self.std_init = std_init
@@ -125,7 +126,7 @@ class BGD_NEW_UPDATE(Optimizer):
             group["eps"] = None
         assert groups_cnt > 0, "Called aggregate_grads, but all gradients were None. Make sure you called .backward()"
 
-    def step_nazreen_GMM(self, closure=None):
+    def step(self, closure=None):
         """
         Updates the learned mean and STD.
         :return:
@@ -192,10 +193,10 @@ class BGD_NEW_UPDATE(Optimizer):
         # self.randomize_weights(force_std=0)
         # To use GMM
         ## ISSUE: The weights are not being randomized properly - Should it be called before updating mean and std (by step func)?
-        self.randomize_weights_GMM(force_std=0)
+        self.randomize_weights(force_std=0)
         self._init_accumulators()
     
-    def step(self, closure=None):
+    def step_dont_use(self, closure=None):
         """
         Updates the learned mean and STD.
         :return:

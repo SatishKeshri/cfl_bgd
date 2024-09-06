@@ -1,7 +1,7 @@
 import torch
 from torch.optim.optimizer import Optimizer
 
-print("ITS HERE IN NORMAL BGD OPTIMIZER")
+
 
 class BGD(Optimizer):
     """Implements BGD.
@@ -27,6 +27,7 @@ class BGD(Optimizer):
         :param mc_iters: Number of Monte Carlo iteration. Used for correctness check.
                          Use None to disable the check.
         """
+        print("ITS HERE IN NORMAL BGD OPTIMIZER")
         super(BGD, self).__init__(params, defaults={})
         assert mc_iters is None or (type(mc_iters) == int and mc_iters > 0), "mc_iters should be positive int or None."
         self.std_init = std_init
