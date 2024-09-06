@@ -1,0 +1,20 @@
+****************************************************************************************************
+Writing results to ds_cont_permuted_mnist_5_tasks_150_epochs_alpha_100000.0_data_type_non_iid_2.0_mean_eta__bgd_new_update_optim_4_beta_with_grad_clip_18:28_06-09-2024
+Arguments are Namespace(dataset='ds_cont_permuted_mnist', nn_arch='mnist_simple_net_200width_domainlearning_784input_10cls_1ds', logname='continous_permuted_mnist_5_tasks', results_dir='ds_cont_permuted_mnist_5_tasks_150_epochs_alpha_100000.0_data_type_non_iid_2.0_mean_eta__bgd_new_update_optim_4_beta_with_grad_clip_18:28_06-09-2024', seed=1000, num_workers=1, num_epochs=150, batch_size=32, pruning_percents=[], train_mc_iters=10, std_init=0.05, mean_eta=2.0, permanent_prune_on_epoch=-1, permanent_prune_on_epoch_percent=90, momentum=0.9, lr=0.01, weight_decay=0.0005, test_freq=1, contpermuted_beta=4, optimizer='bgd_new_update', optimizer_params='{}', inference_mc=False, inference_map=True, inference_committee=False, inference_aggsoftmax=False, inference_initstd=False, committee_size=0, test_mc_iters=0, init_params=['{"bias_type":', '"xavier",', '"conv_type":', '"xavier",', '"bn_init":', '"01"}'], desc='', bw_to_rgb=False, permuted_offset=False, labels_trick=False, num_of_permutations=4, iterations_per_virtual_epc=469, separate_labels_space=False, permute_seed=2019, federated_learning=True, n_clients=5, num_aggs_per_task=10, grad_clip=True, max_grad_norm=1.0, non_iid_split=True, alpha=100000.0, alpha_mg=0.4)
+########################## 
+######### Round 1 complete ######### 
+####### Round No. - 1, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.277], [18.33]], '1': [[2.262], [13.81]], '2': [[2.276], [15.58]], '3': [[2.283], [17.38]], '4': [[2.272], [17.77]]}
+############################# 
+######### Round 1 complete ######### 
+####### Round No. - 1, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.302], [15.5]], '1': [[2.289], [12.01]], '2': [[2.299], [13.91]], '3': [[2.306], [15.09]], '4': [[2.296], [15.05]]}
+############################# 
+######### Round 2 complete ######### 
+####### Round No. - 2, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.184], [24.95]], '1': [[2.173], [23.77]], '2': [[2.179], [24.71]], '3': [[2.182], [25.9]], '4': [[2.186], [20.25]]}
+############################# 
+######### Round 2 complete ######### 
+####### Round No. - 2, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.229], [22.54]], '1': [[2.216], [20.33]], '2': [[2.224], [20.89]], '3': [[2.223], [21.82]], '4': [[2.23], [17.49]]}
+############################# 
