@@ -34,3 +34,91 @@ Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds ar
 ####### Round No. - 3, Task No. - 0 #########
 Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[3.052], [14.05]], '1': [[3.988], [18.6]], '2': [[3.391], [30.6]], '3': [[3.215], [30.6]], '4': [[3.566], [30.33]]}
 ############################# 
+######### Round 6 complete ######### 
+####### Round No. - 6, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.536], [11.06]], '1': [[2.343], [17.8]], '2': [[2.35], [28.57]], '3': [[2.198], [28.76]], '4': [[2.683], [22.86]]}
+############################# 
+######### Round 4 complete ######### 
+####### Round No. - 4, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[3.178], [16.63]], '1': [[3.336], [19.17]], '2': [[3.405], [30.79]], '3': [[3.409], [30.22]], '4': [[3.544], [30.66]]}
+############################# 
+######### Round 7 complete ######### 
+####### Round No. - 7, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.469], [11.86]], '1': [[2.354], [18.42]], '2': [[2.805], [28.72]], '3': [[2.343], [27.95]], '4': [[2.654], [24.4]]}
+############################# 
+######### Round 5 complete ######### 
+####### Round No. - 5, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.775], [24.55]], '1': [[2.234], [31.84]], '2': [[4.075], [30.5]], '3': [[3.179], [30.67]], '4': [[3.544], [30.62]]}
+############################# 
+######### Round 8 complete ######### 
+####### Round No. - 8, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.07], [18.3]], '1': [[2.444], [18.36]], '2': [[2.278], [29.62]], '3': [[2.901], [26.3]], '4': [[2.503], [27.68]]}
+############################# 
+######### Round 6 complete ######### 
+####### Round No. - 6, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.846], [19.91]], '1': [[3.023], [20.87]], '2': [[3.804], [30.88]], '3': [[3.24], [30.67]], '4': [[3.739], [31.27]]}
+############################# 
+######### Round 9 complete ######### 
+####### Round No. - 9, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.116], [20.78]], '1': [[2.423], [20.0]], '2': [[2.806], [29.81]], '3': [[1.939], [27.75]], '4': [[3.013], [24.09]]}
+############################# 
+######### Round 7 complete ######### 
+####### Round No. - 7, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[3.071], [18.23]], '1': [[2.336], [28.89]], '2': [[4.126], [30.98]], '3': [[3.437], [30.63]], '4': [[3.697], [31.18]]}
+############################# 
+######### Round 10 complete ######### 
+####### Round No. - 10, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[1.914], [22.92]], '1': [[2.473], [19.47]], '2': [[2.888], [30.77]], '3': [[3.579], [31.71]], '4': [[2.32], [35.52]]}
+############################# 
+######### Round 8 complete ######### 
+####### Round No. - 8, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.625], [26.24]], '1': [[1.928], [34.36]], '2': [[4.18], [31.7]], '3': [[3.614], [31.2]], '4': [[3.827], [30.64]]}
+############################# 
+######### Round 11 complete ######### 
+####### Round No. - 11, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.278], [21.96]], '1': [[2.507], [20.5]], '2': [[3.533], [29.75]], '3': [[1.865], [34.04]], '4': [[2.638], [35.6]]}
+############################# 
+######### Round 9 complete ######### 
+####### Round No. - 9, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.512], [26.61]], '1': [[2.247], [32.23]], '2': [[3.473], [32.51]], '3': [[3.184], [32.29]], '4': [[4.016], [32.78]]}
+############################# 
+######### Round 12 complete ######### 
+####### Round No. - 12, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.338], [22.03]], '1': [[2.084], [33.93]], '2': [[2.331], [30.39]], '3': [[2.016], [35.69]], '4': [[2.839], [30.04]]}
+############################# 
+######### Round 10 complete ######### 
+####### Round No. - 10, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.836], [25.57]], '1': [[3.233], [21.97]], '2': [[3.56], [33.24]], '3': [[3.683], [37.07]], '4': [[3.58], [32.93]]}
+############################# 
+######### Round 13 complete ######### 
+####### Round No. - 13, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.063], [34.94]], '1': [[2.661], [25.59]], '2': [[2.458], [33.09]], '3': [[4.824], [35.25]], '4': [[3.542], [36.89]]}
+############################# 
+######### Round 11 complete ######### 
+####### Round No. - 11, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.565], [29.82]], '1': [[4.194], [22.56]], '2': [[3.597], [33.52]], '3': [[3.373], [32.51]], '4': [[3.509], [33.21]]}
+############################# 
+######### Round 14 complete ######### 
+####### Round No. - 14, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[4.001], [29.22]], '1': [[2.897], [45.17]], '2': [[5.896], [31.69]], '3': [[2.345], [39.7]], '4': [[3.25], [38.0]]}
+############################# 
+######### Round 12 complete ######### 
+####### Round No. - 12, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.826], [26.54]], '1': [[3.947], [21.05]], '2': [[3.643], [33.92]], '3': [[3.66], [34.06]], '4': [[3.579], [32.68]]}
+############################# 
+######### Round 15 complete ######### 
+####### Round No. - 15, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[5.131], [28.59]], '1': [[4.286], [25.44]], '2': [[6.839], [34.31]], '3': [[2.005], [37.75]], '4': [[3.437], [43.29]]}
+############################# 
+######### Round 13 complete ######### 
+####### Round No. - 13, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.405], [30.51]], '1': [[4.012], [25.07]], '2': [[3.274], [32.7]], '3': [[3.306], [36.27]], '4': [[4.493], [32.44]]}
+############################# 
+######### Round 16 complete ######### 
+####### Round No. - 16, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[4.489], [33.02]], '1': [[5.317], [24.0]], '2': [[10.428], [33.62]], '3': [[2.409], [38.66]], '4': [[5.088], [40.63]]}
+############################# 
+######### Round 14 complete ######### 
+####### Round No. - 14, Task No. - 0 #########
+Client-wise [loss, accuracy] accuracies bgd_new_update_optim after all rounds are {'0': [[2.5], [31.15]], '1': [[3.117], [31.73]], '2': [[3.191], [33.79]], '3': [[3.102], [38.11]], '4': [[3.944], [38.24]]}
+############################# 
