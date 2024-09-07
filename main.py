@@ -161,7 +161,7 @@ logger.info(f"Arguments are {args}")
 
 
 def agg_client_models_avg(client_models,client_optimizers):
-
+    print("using this- - - - -- - -- - - -")
 
     model_params = {}
 
@@ -183,7 +183,9 @@ def agg_client_models_avg(client_models,client_optimizers):
     # ISSUE: WRONG sigma and mean calculation  - take client wise deterministic ones
     for layer_id in model_params.keys():
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)
-        model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
+        # model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(model_params[layer_id]['std_param']))
+        model_params[layer_id]['params'] = model_params[layer_id]['mean_param'].add(model_params[layer_id]['eps'].mul(args.std_init))# (model_params[layer_id]['std_param']))
+
 
 
     model_params_lst = [layer_weights['params'] for layer_id,layer_weights in model_params.items()]
@@ -233,7 +235,7 @@ def agg_client_models_new(client_models, client_optimizers):
                 model_params[layer_id]['variance_param'].add_(torch.div(torch.sub(torch.add(current_client_variance, current_client_mean_square), server_mean_param_square ), total_clients))
 
     for layer_id,layer in enumerate(client_optimizers[client_id].param_groups):
-        model_params[layer_id]['std_param'] = torch.sqrt(model_params[layer_id]['variance_param']) 
+        model_params[layer_id]['std_param'] = torch.sqrt(model_params[layer_id]['variance_param'])
 
     for layer_id in model_params.keys():
         model_params[layer_id]['eps'] = torch.normal(torch.zeros_like(model_params[layer_id]['std_param']), 1)

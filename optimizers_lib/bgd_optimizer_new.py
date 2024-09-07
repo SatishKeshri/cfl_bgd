@@ -132,6 +132,7 @@ class BGD_NEW_UPDATE(Optimizer):
         :return:
         """
         # Makes sure that self.mc_iters had been taken.
+        # print("I am in new step function!")
         assert self.mc_iters is None or self.mc_iters == self.mc_iters_taken, "MC iters is set to " \
                                                                               + str(self.mc_iters) \
                                                                               + ", but took " + \
@@ -152,13 +153,6 @@ class BGD_NEW_UPDATE(Optimizer):
             e_grad = group["grad_sum"].div(self.mc_iters_taken)
             e_grad_eps = group["grad_mul_eps_sum"].div(self.mc_iters_taken)
 
-            # Update mean and STD params
-
-            # print("Local mean", mean)
-            # print("Global mean", g_mean)
-
-            # print("Local std", std)
-            # print("Global std", g_std)
             
             denominator = var.mul(self.alpha_mg).add(g_var.mul(1-self.alpha_mg))
 
@@ -194,35 +188,4 @@ class BGD_NEW_UPDATE(Optimizer):
         # To use GMM
         ## ISSUE: The weights are not being randomized properly - Should it be called before updating mean and std (by step func)?
         self.randomize_weights(force_std=0)
-        self._init_accumulators()
-    
-    def step_dont_use(self, closure=None):
-        """
-        Updates the learned mean and STD.
-        :return:
-        """
-        # Makes sure that self.mc_iters had been taken.
-        assert self.mc_iters is None or self.mc_iters == self.mc_iters_taken, "MC iters is set to " \
-                                                                              + str(self.mc_iters) \
-                                                                              + ", but took " + \
-                                                                              str(self.mc_iters_taken) + " MC iters"
-        # self.randomize_weights_GMM(force_std=0)
-        # # First set the weights to the GMM weights
-        # for (group_l, group_g) in zip(self.param_groups, self.global_model_param_groups):
-        #     mean_l, mean_g = group_l["mean_param"], group_g["g_mean_param"]
-        #     std_l, std_g = group_l["std_param"], group_g["g_std_param"]
-        #     mean_l.copy_(mean_g.mul(self.alpha_mg).add(mean_l.mul(1-self.alpha_mg)))
-        #     std_l.copy_(torch.sqrt(std_l.pow(2).mul(self.alpha_mg).add(std_g.pow(2).mul(1-self.alpha_mg)).add(self.alpha_mg*(1-self.alpha_mg)*(mean_l-mean_g).pow(2))))
-        # print(f"Weights are set to GMM weights: last ones are: {mean_l, std_l}")
-        for group in self.param_groups:
-            mean = group["mean_param"]
-            std = group["std_param"]
-            # Divide gradients by MC iters to get expectation
-            e_grad = group["grad_sum"].div(self.mc_iters_taken)
-            e_grad_eps = group["grad_mul_eps_sum"].div(self.mc_iters_taken)
-            # Update mean and STD params
-            mean.add_(-std.pow(2).mul(e_grad).mul(self.mean_eta))
-            sqrt_term = torch.sqrt(e_grad_eps.mul(std).div(2).pow(2).add(1)).mul(std)
-            std.copy_(sqrt_term.add(-e_grad_eps.mul(std.pow(2)).div(2)))
-        self.randomize_weights_GMM(force_std=0)
         self._init_accumulators()
