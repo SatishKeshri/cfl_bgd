@@ -111,6 +111,68 @@ def extract_accuracies(file_path, non_iid: bool=False, rounds_per_task=10):
     return iid_accuracies, non_iid_accuracies
 
 
+def extract_avg_accs_from_ds_file(file_dir, rounds_per_task=10):
+    accuracies = {}
+    pattern = r'\[(.*?)\]'
+    for filename in os.listdir(file_path):
+        print(f"############   {filename} #############")
+        with open(file_dir+filename, 'r') as file:
+            for line in file:
+                # Regex pattern for extracting round number and accuracies
+                if "Average accuracies" in line:
+                    matches = re.search(pattern, line)
+                    # Convert the extracted string to a list of floats
+                    if matches:
+                        numbers = [float(num) for num in matches.group(1).split(', ') if num]
+                        numbers = [numbers[idx] for idx in range(0, len(numbers), rounds_per_task)]
+                        print(numbers)
+                        # print(numbers)
+                        file_name = filename[-112:-41]
+                        accuracies[file_name] = numbers
+    return accuracies
+
+def extract_avg_test_accuracies_log_file(file_dir, rounds_per_task=10):
+    accuracies = {}
+    # Pattern to match the required parameters
+    pattern_namespace = r'Namespace\((.*?)\)'
+    # pattern_args = re.compile(r"beta='([^']*)'.*?nn_arch='([^']*)'.*?logname='([^']*)'")
+    #  a = r"(beta|alpha_mg|alpha|mean_eta|n_clients|num_aggs_per_task)=([0-9.]+)"
+    pattern_avg_acc = r"Avg Test Accuracies\s*:\s*(\[[^\]]*\])"
+
+    for filename in os.listdir(file_path):
+        print(f"############   {filename} #############")
+        with open(file_dir+filename, 'r') as file:
+            for line in file:
+                # Find all matches
+                matches_args = re.findall(pattern_namespace, line)
+                if len(matches_args) > 0:
+                    args = matches_args[0].split(', ')
+                    args_list = [tuple(i.split("=")) for i in args]
+                    matches_args = [i for i in args_list if i[0] in ['optimizer','beta', 'alpha_mg', 'alpha', 'mean_eta', 'n_clients', 'num_aggs_per_task']]
+                    file_name = "_".join([f"{key}_{val}" for key, val in matches_args])
+                    # if "100000" in file_name:
+                    #     break
+                # Create the output string
+                    args_used = "_".join([f"{key}_{val}" for key, val in matches_args])
+                # Regex pattern for extracting round number and accuracies
+                if "Avg Test Accuracies" in line:
+                    matches = re.search(pattern_avg_acc, line)
+                    # Convert the extracted string to a list of floats
+                    if matches:
+                        ext_list = matches.group(1)
+                        ext_list = ext_list.split(', ')
+                        ext_list = [i.replace('[', '') for i in ext_list]
+                        ext_list = [i.replace(']', '') for i in ext_list]
+                        # ext_list = map(str.replace('[', ''), ext_list)
+                        # ext_list = map(str.replace(']', ''), ext_list)
+                        numbers = list(map(float, ext_list))
+                        numbers = [numbers[idx] for idx in range(rounds_per_task-1, len(numbers), rounds_per_task)]
+                        print(numbers)
+                        # print(numbers)
+                        file_name = args_used
+                        accuracies[file_name] = numbers
+    return accuracies
+
 
 def plot_average_accuracies_over_rounds_multi_runs(accuracies, fig_name:str):
     plt.figure(figsize=(10, 6))
@@ -118,11 +180,12 @@ def plot_average_accuracies_over_rounds_multi_runs(accuracies, fig_name:str):
     
     max_length = 0
     lengths = []
-    for file, task_accuracies in accuracies.items():
+    colors = plt.get_cmap('tab20').colors  # Get 15 distinct colors
+    for id, (file, task_accuracies) in enumerate(accuracies.items()):
         tasks = range(0, len(task_accuracies))
         task_means = [np.mean(np.array(task_accs)) for task_accs in task_accuracies]
         print(f"{file}_means: {task_means}")
-        plt.plot(tasks, task_means, label=file, linewidth=2.5)
+        plt.plot(tasks, task_means, label=file, linewidth=2.5, color=colors[id % 30])
         lengths.append(len(task_accuracies))
         max_length = max(max_length, len(task_accuracies))
     
@@ -136,22 +199,26 @@ def plot_average_accuracies_over_rounds_multi_runs(accuracies, fig_name:str):
     plt.grid(True)
     # plt.tight_layout()
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    plt.savefig('./plot_images/'+fig_name+'.png', bbox_inches='tight')
+    plt.savefig('./plot_images/baselines/'+fig_name+'.png', bbox_inches='tight')
     # plt.show()
 
 
 
-# Example usage:
-filepath = './icassp_output_txt/'  # Replace with the directory of your files
-accuracies, acc_list = extract_accuracies(filepath)
+# # Example usage:
+# filepath = './icassp_output_txt/'  # Replace with the directory of your files
+# accuracies, acc_list = extract_accuracies(filepath)
 
 # Exract accuracies from the file
-file_path = './icassp_output_txt/'
-iid_accuracies, non_iid_accuracies = extract_accuracies(file_path, rounds_per_task=10)
+file_path = './plot_logs_txts/' #'./icassp_output_txt/'
+# file_path = './icassp_output_txt/'
+# iid_accuracies, non_iid_accuracies = extract_accuracies(file_path, rounds_per_task=10)
+accuracies = extract_avg_test_accuracies_log_file(file_path)
+print(accuracies)
+plot_average_accuracies_over_rounds_multi_runs(accuracies, fig_name='logs_plot_comaprison_pmnist')
 
 
 # Plot
 #iid plot
-plot_average_accuracies_over_rounds_multi_runs(iid_accuracies, fig_name='iid_plots')
+# plot_average_accuracies_over_rounds_multi_runs(iid_accuracies, fig_name='iid_plots')
 #non_iid plot
-plot_average_accuracies_over_rounds_multi_runs(non_iid_accuracies, fig_name='non_iid_plots')
+# plot_average_accuracies_over_rounds_multi_runs(non_iid_accuracies, fig_name='Nazreen_pmnist_baseline_non_iid_plots')
