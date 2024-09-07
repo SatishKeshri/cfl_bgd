@@ -553,7 +553,7 @@ class DatasetsLoaders:
 
             # tasks_datasets = [torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)]
             # SKK
-            tasks_datasets = [take_partial_mnist(transform,frac=0.07)]
+            tasks_datasets = [take_partial_mnist(transform,frac=0.99)]
             total_len = len(tasks_datasets[0])
             test_loaders = [torch.utils.data.DataLoader(torchvision.datasets.MNIST(root='./data', train=False,
                                                                                    download=True, transform=transform),
@@ -567,7 +567,7 @@ class DatasetsLoaders:
                 permutation = all_permutation[p_idx]
 
                 # Add train set:
-                tasks_datasets.append(Permutation(take_partial_mnist(transform,frac=0.07),permutation, target_offset=0))
+                tasks_datasets.append(Permutation(take_partial_mnist(transform,frac=0.99),permutation, target_offset=0))
                 if not self.federated_learning:
                     tasks_samples_indices.append(torch.tensor(range(total_len,
                                                                 total_len + len(tasks_datasets[-1])

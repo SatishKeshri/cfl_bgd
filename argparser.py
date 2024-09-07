@@ -106,12 +106,12 @@ def get_args():
     parser.add_argument('--num_of_permutations', default=9, type=int,
                         help='Number of permutations (in addition to the original MNIST) ' 
                             'when using Permuted MNIST dataset [default: 9]')
-    # parser.add_argument('--iterations_per_virtual_epc', default=469, type=int,
-                        # help='When using continuous dataset, number of iterations per epoch (in continuous mode, '
-                        #     'epoch is not defined)') #468
-    parser.add_argument('--iterations_per_virtual_epc', default=67, type=int,
+    parser.add_argument('--iterations_per_virtual_epc', default=469, type=int,
                         help='When using continuous dataset, number of iterations per epoch (in continuous mode, '
                             'epoch is not defined)') #468
+    # parser.add_argument('--iterations_per_virtual_epc', default=67, type=int,
+    #                     help='When using continuous dataset, number of iterations per epoch (in continuous mode, '
+    #                         'epoch is not defined)') #468
     
     #Because in continous setting there is no concept of a single task,so we bring in a concept of virtual iterations per epoch to relate this with the concept of epoch
 
