@@ -23,6 +23,14 @@ import pytz
 #Arguments have been moved to a different file named argparser.py
 args = get_args()
 
+print("running with abalation!! Are you sure?")
+# user_input = input("Enter your response (Y/yes): ").strip().lower()
+
+# if user_input not in ["y", "yes"]:
+#     print("you didn't press Y or Yes. Exiting")
+#     import sys
+#     sys.exit()
+
 ###########################################################################
 # Verify arguments
 ###########################################################################
@@ -108,11 +116,11 @@ if not os.path.exists(save_path):
     os.makedirs(save_path)
 
 
-if not os.path.exists('icassp_all_experiments_results'):
-    os.makedirs('icassp_all_experiments_results')
+if not os.path.exists('icassp_abalation_all_experiments_results'):
+    os.makedirs('icassp_abalation_all_experiments_results')
 
 # Write the initial message to the file before entering the loop
-with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'w') as f:
+with open(f'icassp_abalation_all_experiments_results/{args.results_dir}.txt', 'w') as f:
     f.write(f"{'*'*100}\n")
     f.write(f"Writing results to {args.results_dir}\n")
 
@@ -317,7 +325,7 @@ def test_agg_model(server_model,test_loaders, round_no):
 # Dataset
 
 if args.federated_learning:
-    with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'a') as f:
+    with open(f'icassp_abalation_all_experiments_results/{args.results_dir}.txt', 'a') as f:
         f.write(f"Arguments are {args}\n")
         f.write(f"########################## \n")
     client_train_loaders, test_loaders = utils.datasets.__dict__[args.dataset](batch_size=args.batch_size,
@@ -512,13 +520,13 @@ if args.federated_learning:
         
         logger.info(f"Round - {round_no+1} complete")
 
-        with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'a') as f:
+        with open(f'icassp_abalation_all_experiments_results/{args.results_dir}.txt', 'a') as f:
             f.write(f"######### Round {round_no+1} complete ######### \n")
             f.write(f"####### Round No. - {round_no+1}, Task No. - {(round_no) // (args.num_aggs_per_task)} #########\n")
             f.write(f"Client-wise [loss, accuracy] accuracies {args.optimizer}_optim after all rounds are {client_wise_report}\n")
             f.write(f"############################# \n")
 
-    with open(f'icassp_all_experiments_results/{args.results_dir}.txt', 'a') as f:
+    with open(f'icassp_abalation_all_experiments_results/{args.results_dir}.txt', 'a') as f:
         f.write(f"Task-wise accuracies {args.optimizer}_optim after all rounds are {task_wise_accuracies_every_round}\n")
         f.write(f"Task-wise losses {args.optimizer}_optim after all rounds are {task_wise_losses_every_round}\n")
         f.write(f"Average accuracies {args.optimizer}_optim after all rouds are {avg_test_accuracies}\n")

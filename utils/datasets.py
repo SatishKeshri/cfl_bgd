@@ -10,6 +10,8 @@ from PIL import Image
 import errno
 import copy
 import time
+from sklearn.model_selection import StratifiedShuffleSplit
+from torch.utils.data import Subset
 
 
 def _reduce_class(set, classes, train, preserve_label_space=True):
@@ -404,9 +406,6 @@ class DatasetsLoaders:
                 transform = transforms.Compose(
                     [transforms.ToTensor()])
 
-            # Create train set
-            self.train_set = torchvision.datasets.MNIST(root='./data', train=True,
-                                                        download=True, transform=transform)
             if kwargs.get("permutation", False):
                 # Permute if permutation is provided
                 self.train_set = Permutation(torchvision.datasets.MNIST(root='./data', train=True,
@@ -551,7 +550,10 @@ class DatasetsLoaders:
                     [transforms.ToTensor()])
 
             # Original MNIST
-            tasks_datasets = [torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)]
+
+            # tasks_datasets = [torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)]
+            # SKK
+            tasks_datasets = [take_partial_mnist(transform,frac=0.2)]
             total_len = len(tasks_datasets[0])
             test_loaders = [torch.utils.data.DataLoader(torchvision.datasets.MNIST(root='./data', train=False,
                                                                                    download=True, transform=transform),
@@ -565,10 +567,7 @@ class DatasetsLoaders:
                 permutation = all_permutation[p_idx]
 
                 # Add train set:
-                tasks_datasets.append(Permutation(torchvision.datasets.MNIST(root='./data', train=True,
-                                                                             download=True, transform=transform),
-                                                  permutation, target_offset=0))
-
+                tasks_datasets.append(Permutation(take_partial_mnist(transform,frac=0.2),permutation, target_offset=0))
                 if not self.federated_learning:
                     tasks_samples_indices.append(torch.tensor(range(total_len,
                                                                 total_len + len(tasks_datasets[-1])
@@ -755,8 +754,25 @@ class DatasetsLoaders:
                                                             num_of_batches=kwargs.get("iterations_per_virtual_epc", 1))
                 
                 self.train_loader = torch.utils.data.DataLoader(all_datasets, batch_size=self.batch_size,
-                                                            num_workers=self.num_workers, sampler=train_sampler, pin_memory=pin_memory)        
+                                                            num_workers=self.num_workers, sampler=train_sampler, pin_memory=pin_memory)
 
+def take_partial_mnist(transform, frac=0.2, ):
+    """"""
+    dataset_full = torchvision.datasets.MNIST(root='./data', train=True,
+                                                download=True, transform=transform)
+    # Extract data and targets from the dataset
+    data = dataset_full.data
+    targets = dataset_full.targets
+    # Use StratifiedShuffleSplit to sample 20% while preserving class distribution
+    sss = StratifiedShuffleSplit(n_splits=1, test_size=frac, random_state=42)
+
+    for _, sample_idx in sss.split(data, targets):
+        sampled_indices = sample_idx
+
+    # Create a subset of the dataset using the sampled indices
+    dataset_part = Subset(dataset_full, sampled_indices)
+    print(f"Took {frac*100}% of the P-MNSIT dataset")
+    return dataset_part
          
 class ContinuousMultinomialSampler(torch.utils.data.Sampler):
     r"""Samples elements randomly. If without replacement, then sample from a shuffled dataset.
