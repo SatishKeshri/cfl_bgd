@@ -1,0 +1,74 @@
+running with abalation!! Are you sure?
+[2024-09-07 22:50:20 Info] Script args: Namespace(dataset='ds_cont_permuted_mnist', nn_arch='mnist_simple_net_200width_domainlearning_784input_10cls_1ds', logname='continous_permuted_mnist_5_tasks', results_dir='ds_cont_permuted_mnist_5_tasks_50_epochs_alpha_0.01_data_type_non_iid_3.0_mean_eta__bgd_new_update_optim_4_beta_with_grad_clip_04:20_08-09-2024', seed=1000, num_workers=8, num_epochs=50, batch_size=128, pruning_percents=[], train_mc_iters=10, std_init=0.05, mean_eta=3.0, permanent_prune_on_epoch=-1, permanent_prune_on_epoch_percent=90, momentum=0.9, lr=0.01, weight_decay=0.0005, test_freq=1, contpermuted_beta=4, optimizer='bgd_new_update', optimizer_params='{}', inference_mc=False, inference_map=True, inference_committee=False, inference_aggsoftmax=False, inference_initstd=False, committee_size=0, test_mc_iters=0, init_params=['{"bias_type":', '"xavier",', '"conv_type":', '"xavier",', '"bn_init":', '"01"}'], desc='', bw_to_rgb=False, permuted_offset=False, labels_trick=False, num_of_permutations=4, iterations_per_virtual_epc=469, separate_labels_space=False, permute_seed=2019, federated_learning=True, n_clients=5, num_aggs_per_task=1, grad_clip=True, max_grad_norm=1.0, non_iid_split=True, alpha=0.01, alpha_mg=0.1)
+[2024-09-07 22:50:20 Info] Computer name: iiitd with pytorch version: 2.0.1
+Dataset is  ds_cont_permuted_mnist
+[2024-09-07 22:50:20 Info] Arguments are Namespace(dataset='ds_cont_permuted_mnist', nn_arch='mnist_simple_net_200width_domainlearning_784input_10cls_1ds', logname='continous_permuted_mnist_5_tasks', results_dir='ds_cont_permuted_mnist_5_tasks_50_epochs_alpha_0.01_data_type_non_iid_3.0_mean_eta__bgd_new_update_optim_4_beta_with_grad_clip_04:20_08-09-2024', seed=1000, num_workers=8, num_epochs=50, batch_size=128, pruning_percents=[], train_mc_iters=10, std_init=0.05, mean_eta=3.0, permanent_prune_on_epoch=-1, permanent_prune_on_epoch_percent=90, momentum=0.9, lr=0.01, weight_decay=0.0005, test_freq=1, contpermuted_beta=4, optimizer='bgd_new_update', optimizer_params='{}', inference_mc=False, inference_map=True, inference_committee=False, inference_aggsoftmax=False, inference_initstd=False, committee_size=0, test_mc_iters=0, init_params=['{"bias_type":', '"xavier",', '"conv_type":', '"xavier",', '"bn_init":', '"01"}'], desc='', bw_to_rgb=False, permuted_offset=False, labels_trick=False, num_of_permutations=4, iterations_per_virtual_epc=469, separate_labels_space=False, permute_seed=2019, federated_learning=True, n_clients=5, num_aggs_per_task=1, grad_clip=True, max_grad_norm=1.0, non_iid_split=True, alpha=0.01, alpha_mg=0.1)
+Took 99.0% of the P-MNSIT dataset
+Took 99.0% of the P-MNSIT dataset
+Took 99.0% of the P-MNSIT dataset
+Took 99.0% of the P-MNSIT dataset
+Took 99.0% of the P-MNSIT dataset
+round_end_iters list [ 5862 10552 15242 19932 23450]
+[ 5862 10552 15242 19932 23450]
+5
+Client Indices Generation starts
+Non-IID split is happening and alpha is 0.01
+Non-IID split is happening and alpha is 0.01
+Non-IID split is happening and alpha is 0.01
+Non-IID split is happening and alpha is 0.01
+Non-IID split is happening and alpha is 0.01
+Clients Indices Generation ends
+Client Indices Generation took 76.0414366722107 seconds
+1
+[2024-09-07 22:51:37 Info] Transformed model to CUDA
+[2024-09-07 22:51:37 Info] Initialized 0 Conv2d layers using nn.init.xavier_normal_
+[2024-09-07 22:51:37 Info] Initialized 3 linear layers using xavier
+[2024-09-07 22:51:37 Info] Initialized 0 bias conv2d layers using nn.init.xavier.noraml_
+[2024-09-07 22:51:37 Info] Initialized 3 bias linear layers using xavier
+[2024-09-07 22:51:37 Info] Initialized 0 BN layers using weight=1 and bias=0
+[2024-09-07 22:51:37 Info] BGD params: {'mean_eta': 3.0, 'std_init': 0.05, 'mc_iters': 10, 'alpha_mg': 0.1}
+It's here in new bgd optimizer
+0
+[2024-09-07 22:51:37 Info] Inference method: {'map'}
+[2024-09-07 22:51:37 Info] Number of parameters in the model is 199,210
+[2024-09-07 22:51:37 Info] Criterion parameters: type=<class 'torch.nn.modules.loss.CrossEntropyLoss'>
+[2024-09-07 22:51:37 Info] BGD params: {'mean_eta': 3.0, 'std_init': 0.05, 'mc_iters': 10, 'alpha_mg': 0.1}
+It's here in new bgd optimizer
+[2024-09-07 22:51:37 Info] Gradient clipping with max_norm being done
+Model id is  140602665664464
+Model value at client 1 is 19.580320358276367 in round 1
+[2024-09-07 22:51:37 Info] Training epoch number 1 with dataset number 0
+[2024-09-07 22:51:49 Info] Client id 0, Epoch 1, train set, Iter 500 current average loss 0.9323
+[2024-09-07 22:52:00 Info] Client id 0, Epoch 1, train set, Iter 1000 current average loss 0.9214
+[2024-09-07 22:52:11 Info] Client id 0, Epoch 1, train set, Iter 1500 current average loss 0.9188
+[2024-09-07 22:52:21 Info] Client id 0, Epoch 1, train set, Iter 2000 current average loss 0.9162
+[2024-09-07 22:52:32 Info] Client id 0, Epoch 1, train set, Iter 2500 current average loss 0.916
+[2024-09-07 22:52:42 Info] Client id 0, Epoch 1, train set, Iter 3000 current average loss 0.9153
+[2024-09-07 22:52:53 Info] Client id 0, Epoch 1, train set, Iter 3500 current average loss 0.915
+[2024-09-07 22:53:04 Info] Client id 0, Epoch 1, train set, Iter 4000 current average loss 0.9247
+[2024-09-07 22:53:15 Info] Client id 0, Epoch 1, train set, Iter 4500 current average loss 0.941
+[2024-09-07 22:53:26 Info] Client id 0, Epoch 1, train set, Iter 5000 current average loss 0.9573
+[2024-09-07 22:53:36 Info] Client id 0, Epoch 1, train set, Iter 5500 current average loss 0.9701
+[2024-09-07 22:53:44 Info] Running test set for epoch number 1 for dataset idx 0 using map
+[2024-09-07 22:53:44 Info] Stats for test [map] set of size 10000, loss is 2.8025, acc is 10.1%
+[2024-09-07 22:53:44 Info] Running test set for epoch number 1 for dataset idx 1 using map
+[2024-09-07 22:53:45 Info] Stats for test [map] set of size 10000, loss is 3.3941, acc is 19.74%
+[2024-09-07 22:53:45 Info] Running test set for epoch number 1 for dataset idx 2 using map
+[2024-09-07 22:53:45 Info] Stats for test [map] set of size 10000, loss is 2.8731, acc is 10.11%
+[2024-09-07 22:53:45 Info] Running test set for epoch number 1 for dataset idx 3 using map
+[2024-09-07 22:53:46 Info] Stats for test [map] set of size 10000, loss is 2.7189, acc is 10.1%
+[2024-09-07 22:53:46 Info] Running test set for epoch number 1 for dataset idx 4 using map
+[2024-09-07 22:53:47 Info] Stats for test [map] set of size 10000, loss is 2.9557, acc is 10.24%
+[2024-09-07 22:53:47 Info] Average accuracy over all tasks for epoch number 1 for dataset idx 4 using map is 12.058
+[2024-09-07 22:53:47 Info] Finished epoch number 1, Took 129 seconds
+Round - 1,Client - 1
+5862, 0, 5862
+[2024-09-07 22:53:47 Info] Inference method: {'map'}
+[2024-09-07 22:53:47 Info] Number of parameters in the model is 199,210
+[2024-09-07 22:53:47 Info] Criterion parameters: type=<class 'torch.nn.modules.loss.CrossEntropyLoss'>
+[2024-09-07 22:53:47 Info] BGD params: {'mean_eta': 3.0, 'std_init': 0.05, 'mc_iters': 10, 'alpha_mg': 0.1}
+It's here in new bgd optimizer
+[2024-09-07 22:53:47 Info] Gradient clipping with max_norm being done
+Model id is  140602606789776
+Model value at client 2 is 19.580320358276367 in round 1
+[2024-09-07 22:53:47 Info] Training epoch number 1 with dataset number 0
